@@ -3,272 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Explore Gallery</title>
-  <style>
-    :root {
-      --bg-color: #0b0f17;
-      --card-bg: #161b26;
-      --accent-color: #6366f1;
-      --accent-hover: #4f46e5;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --border-color: #262c3a;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-    }
-
-    /* 사이드바 */
-    aside {
-      width: 240px;
-      padding: 24px 16px;
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-    }
-    .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-    .nav-item {
-      padding: 10px 14px;
-      border-radius: 8px;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-    }
-    .nav-item:hover, .nav-item.active {
-      background-color: #1e2638;
-      color: #fff;
-    }
-
-    /* 메인 영역 */
-    main {
-      flex: 1;
-      padding: 24px 32px;
-      overflow-y: auto;
-    }
-
-    /* 헤더 & 검색바 */
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      gap: 16px;
-    }
-    .search-box {
-      position: relative;
-      flex: 1;
-      max-width: 600px;
-    }
-    .search-box input {
-      width: 100%;
-      padding: 12px 16px 12px 42px;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .search-box input:focus { border-color: var(--accent-color); }
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
-    .file-input-btn {
-      background-color: var(--accent-color);
-      color: white;
-      padding: 10px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: inline-block;
-      transition: background 0.2s;
-    }
-    .file-input-btn:hover { background-color: var(--accent-hover); }
-
-    /* Masonry 컬럼 레이아웃 */
-    .masonry-grid {
-      column-count: 4;
-      column-gap: 16px;
-    }
-    @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
-    @media (max-width: 800px) { .masonry-grid { column-count: 2; } }
-    @media (max-width: 500px) { .masonry-grid { column-count: 1; } }
-
-    /* 카드 스타일 */
-    .card {
-      break-inside: avoid;
-      margin-bottom: 16px;
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-color);
-    }
-    .card img {
-      width: 100%;
-      display: block;
-      border-radius: 12px 12px 0 0;
-      object-fit: cover;
-    }
-    .card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 60%);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 16px;
-    }
-    .card:hover .card-overlay { opacity: 1; }
-    .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
-    .card-prompt {
-      font-size: 0.8rem;
-      color: #d1d5db;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .card-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .like-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 20px;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-      transition: background 0.2s;
-    }
-    .like-btn:hover { background: rgba(255, 255, 255, 0.3); }
-
-    /* 모달 */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .modal.active { display: flex; }
-    .modal-content {
-      background: var(--card-bg);
-      max-width: 900px;
-      width: 100%;
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      max-height: 85vh;
-      border: 1px solid var(--border-color);
-    }
-    .modal-img-container {
-      flex: 1.2;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-img-container img { max-width: 100%; max-height: 85vh; object-fit: contain; }
-    .modal-info {
-      flex: 1;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow-y: auto;
-    }
-    .prompt-box {
-      background: #0d1117;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      margin: 12px 0;
-      word-break: break-all;
-      color: #e5e7eb;
-    }
-    .copy-btn {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      align-self: flex-start;
-      margin-bottom: 16px;
-    }
-    .close-modal {
-      align-self: flex-end;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-  </style>
+  <title>CNS Gallery</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <!-- 사이드바 Navigation -->
-  <!-- 사이드바 Navigation -->
   <aside>
     <div class="logo">✨ CNS Gallery</div>
-    <ul class="nav-list">
-      <li class="nav-item active" onclick="filterCategory('All')">🔍 Explore All</li>
-      <li class="nav-item" onclick="filterCategory('3D / Art')">🎨 3D & Art</li>
-      <li class="nav-item" onclick="filterCategory('Concept')">🌆 Concept Art</li>
-      <li class="nav-item" onclick="filterCategory('Space')">🚀 Space</li>
-      <li class="nav-item" onclick="filterCategory('Portrait')">🖼️ Portrait</li>
-      <li class="nav-item" onclick="filterCategory('Nature')">🌿 Nature</li>
-    </ul>
+    <div class="nav-menu">
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>전체보기</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item active" onclick="filterBySub('All', event)">🔍 전체 에피소드 보기</li>
+        </ul>
+      </div>
+
+      <!-- Ⅰ. 한국인을 이해하기 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅰ. 한국인을 이해하기</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.01', event)">EP.01 나이 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.02', event)">EP.02 팁 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.03', event)">EP.03 반찬 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.04', event)">EP.04 김치 선호</li>
+          <li class="sub-item" onclick="filterBySub('EP.05', event)">EP.05 신발 벗기</li>
+          <li class="sub-item" onclick="filterBySub('EP.06', event)">EP.06 24시 편의점</li>
+          <li class="sub-item" onclick="filterBySub('EP.07', event)">EP.07 빠른 배달</li>
+          <li class="sub-item" onclick="filterBySub('EP.08', event)">EP.08 두 손 전달 예절</li>
+          <li class="sub-item" onclick="filterBySub('EP.09', event)">EP.09 학원 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.10', event)">EP.10 수능 날 분위기</li>
+          <li class="sub-item" onclick="filterBySub('EP.11', event)">EP.11 서울의 산</li>
+          <li class="sub-item" onclick="filterBySub('EP.12', event)">EP.12 삼겹살 쌈</li>
+          <li class="sub-item" onclick="filterBySub('EP.13', event)">EP.13 생일 미역국</li>
+          <li class="sub-item" onclick="filterBySub('EP.14', event)">EP.14 파전과 막걸리</li>
+          <li class="sub-item" onclick="filterBySub('EP.15', event)">EP.15 집들이 휴지</li>
+          <li class="sub-item" onclick="filterBySub('EP.16', event)">EP.16 숫자 4 기피</li>
+          <li class="sub-item" onclick="filterBySub('EP.17', event)">EP.17 아파트 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.18', event)">EP.18 한강 라면</li>
+          <li class="sub-item" onclick="filterBySub('EP.19', event)">EP.19 한글 창제</li>
+          <li class="sub-item" onclick="filterBySub('EP.20', event)">EP.20 한국의 발전사</li>
+        </ul>
+      </div>
+
+      <!-- Ⅱ. 음식과 한국인의 식생활 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅱ. 음식과 식생활</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.21', event)">EP.21 존댓말 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.22', event)">EP.22 식사 순서 예절</li>
+          <li class="sub-item" onclick="filterBySub('EP.23', event)">EP.23 음주 예절</li>
+          <li class="sub-item" onclick="filterBySub('EP.24', event)">EP.24 김치냉장고</li>
+          <li class="sub-item" onclick="filterBySub('EP.25', event)">EP.25 온돌 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.26', event)">EP.26 서울의 궁궐</li>
+          <li class="sub-item" onclick="filterBySub('EP.27', event)">EP.27 식후 카페</li>
+          <li class="sub-item" onclick="filterBySub('EP.28', event)">EP.28 축의금 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.29', event)">EP.29 빨리빨리</li>
+          <li class="sub-item" onclick="filterBySub('EP.30', event)">EP.30 등산 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.31', event)">EP.31 빨간 김치</li>
+          <li class="sub-item" onclick="filterBySub('EP.32', event)">EP.32 리필 반찬</li>
+          <li class="sub-item" onclick="filterBySub('EP.33', event)">EP.33 테이블 벨</li>
+          <li class="sub-item" onclick="filterBySub('EP.34', event)">EP.34 밥과 국</li>
+          <li class="sub-item" onclick="filterBySub('EP.35', event)">EP.35 숟가락 사용</li>
+        </ul>
+      </div>
+
+      <!-- Ⅲ. 예절·인간관계 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅲ. 예절·인간관계</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.36', event)">EP.36 쇠젓가락</li>
+          <li class="sub-item" onclick="filterBySub('EP.37', event)">EP.37 술 따르기 예절</li>
+          <li class="sub-item" onclick="filterBySub('EP.38', event)">EP.38 호칭 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.39', event)">EP.39 나이 서열</li>
+          <li class="sub-item" onclick="filterBySub('EP.40', event)">EP.40 방문 선물</li>
+          <li class="sub-item" onclick="filterBySub('EP.41', event)">EP.41 이사 떡</li>
+          <li class="sub-item" onclick="filterBySub('EP.42', event)">EP.42 과일 깎기</li>
+          <li class="sub-item" onclick="filterBySub('EP.43', event)">EP.43 시험 엿 선물</li>
+          <li class="sub-item" onclick="filterBySub('EP.44', event)">EP.44 시험 미역국 기피</li>
+          <li class="sub-item" onclick="filterBySub('EP.45', event)">EP.45 홀수 축의금</li>
+          <li class="sub-item" onclick="filterBySub('EP.46', event)">EP.46 장례식 검은 옷</li>
+          <li class="sub-item" onclick="filterBySub('EP.47', event)">EP.47 명절 귀성길</li>
+          <li class="sub-item" onclick="filterBySub('EP.48', event)">EP.48 선물 수량</li>
+          <li class="sub-item" onclick="filterBySub('EP.49', event)">EP.49 사진 V 포즈</li>
+          <li class="sub-item" onclick="filterBySub('EP.50', event)">EP.50 잘 먹겠습니다</li>
+        </ul>
+      </div>
+
+      <!-- Ⅳ. 한국인의 일상 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅳ. 한국인의 일상</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.51', event)">EP.51 편의점 서비스</li>
+          <li class="sub-item" onclick="filterBySub('EP.52', event)">EP.52 무인점포</li>
+          <li class="sub-item" onclick="filterBySub('EP.53', event)">EP.53 카공족</li>
+          <li class="sub-item" onclick="filterBySub('EP.54', event)">EP.54 배달 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.55', event)">EP.55 문 앞 배달</li>
+          <li class="sub-item" onclick="filterBySub('EP.56', event)">EP.56 고층 아파트</li>
+          <li class="sub-item" onclick="filterBySub('EP.57', event)">EP.57 산과 아파트</li>
+          <li class="sub-item" onclick="filterBySub('EP.58', event)">EP.58 입식 좌식</li>
+          <li class="sub-item" onclick="filterBySub('EP.59', event)">EP.59 수저 서랍</li>
+          <li class="sub-item" onclick="filterBySub('EP.60', event)">EP.60 수납 의자</li>
+          <li class="sub-item" onclick="filterBySub('EP.61', event)">EP.61 셀프 물 서비스</li>
+          <li class="sub-item" onclick="filterBySub('EP.62', event)">EP.62 2차 카페</li>
+          <li class="sub-item" onclick="filterBySub('EP.63', event)">EP.63 이열치열 삼계탕</li>
+          <li class="sub-item" onclick="filterBySub('EP.64', event)">EP.64 여름 보양식</li>
+          <li class="sub-item" onclick="filterBySub('EP.65', event)">EP.65 식사 공동체</li>
+        </ul>
+      </div>
+
+      <!-- Ⅴ. 학교·청소년 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅴ. 학교·청소년</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.66', event)">EP.66 학생 교복</li>
+          <li class="sub-item" onclick="filterBySub('EP.67', event)">EP.67 학생 공부시간</li>
+          <li class="sub-item" onclick="filterBySub('EP.68', event)">EP.68 대학 입시열</li>
+          <li class="sub-item" onclick="filterBySub('EP.69', event)">EP.69 수능 현장</li>
+          <li class="sub-item" onclick="filterBySub('EP.70', event)">EP.70 학교 급식</li>
+          <li class="sub-item" onclick="filterBySub('EP.71', event)">EP.71 K-급식 클라스</li>
+          <li class="sub-item" onclick="filterBySub('EP.72', event)">EP.72 방과 후 일상</li>
+          <li class="sub-item" onclick="filterBySub('EP.73', event)">EP.73 중학생의 하루</li>
+          <li class="sub-item" onclick="filterBySub('EP.74', event)">EP.74 조선시대 과거시험</li>
+          <li class="sub-item" onclick="filterBySub('EP.75', event)">EP.75 조선의 학교</li>
+        </ul>
+      </div>
+
+      <!-- Ⅵ. 한국의 역사 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅵ. 한국의 역사</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.76', event)">EP.76 한글의 우수성</li>
+          <li class="sub-item" onclick="filterBySub('EP.77', event)">EP.77 조선 500년</li>
+          <li class="sub-item" onclick="filterBySub('EP.78', event)">EP.78 조선인의 일상</li>
+          <li class="sub-item" onclick="filterBySub('EP.79', event)">EP.79 옛날 측간 문화</li>
+          <li class="sub-item" onclick="filterBySub('EP.80', event)">EP.80 옛 한양의 모습</li>
+          <li class="sub-item" onclick="filterBySub('EP.81', event)">EP.81 경복궁의 위치</li>
+          <li class="sub-item" onclick="filterBySub('EP.82', event)">EP.82 북촌 한옥마을</li>
+          <li class="sub-item" onclick="filterBySub('EP.83', event)">EP.83 전통가옥 한옥</li>
+          <li class="sub-item" onclick="filterBySub('EP.84', event)">EP.84 조선의 시계</li>
+          <li class="sub-item" onclick="filterBySub('EP.85', event)">EP.85 조선의 오일장</li>
+        </ul>
+      </div>
+
+      <!-- Ⅶ. 교통·기술·도시 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅶ. 교통·기술·도시</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.86', event)">EP.86 지하철 스크린도어</li>
+          <li class="sub-item" onclick="filterBySub('EP.87', event)">EP.87 지하철 환승 시스템</li>
+          <li class="sub-item" onclick="filterBySub('EP.88', event)">EP.88 통합 교통카드</li>
+          <li class="sub-item" onclick="filterBySub('EP.89', event)">EP.89 지하철 상가/편의점</li>
+          <li class="sub-item" onclick="filterBySub('EP.90', event)">EP.90 배달 오토바이</li>
+          <li class="sub-item" onclick="filterBySub('EP.91', event)">EP.91 공공 와이파이</li>
+          <li class="sub-item" onclick="filterBySub('EP.92', event)">EP.92 초고속 인터넷</li>
+          <li class="sub-item" onclick="filterBySub('EP.93', event)">EP.93 메가시티 서울</li>
+        </ul>
+      </div>
+
+      <!-- Ⅷ. 한국 여행·지리·감성 -->
+      <div class="category-group">
+        <div class="category-title" onclick="toggleMenu(this)">
+          <span>Ⅷ. 여행·지리·감성</span>
+          <span class="arrow">▼</span>
+        </div>
+        <ul class="sub-menu">
+          <li class="sub-item" onclick="filterBySub('EP.94', event)">EP.94 한강 쉼터</li>
+          <li class="sub-item" onclick="filterBySub('EP.95', event)">EP.95 남산서울타워</li>
+          <li class="sub-item" onclick="filterBySub('EP.96', event)">EP.96 서울 주말 나들이</li>
+          <li class="sub-item" onclick="filterBySub('EP.97', event)">EP.97 서울 vs 부산</li>
+          <li class="sub-item" onclick="filterBySub('EP.98', event)">EP.98 숨은 국내 여행지</li>
+          <li class="sub-item" onclick="filterBySub('EP.99', event)">EP.99 국토 산지 비율</li>
+          <li class="sub-item" onclick="filterBySub('EP.100', event)">EP.100 한강의 기적</li>
+        </ul>
+      </div>
+    </div>
   </aside>
 
   <!-- 메인 컨텐츠 영역 -->
@@ -312,135 +244,6 @@
     </div>
   </div>
 
-  <script>
-    let galleryData = [];
-
-    // 기본 gallery.csv 자동 불러오기
-    window.addEventListener('DOMContentLoaded', () => {
-      fetch('gallery.csv')
-        .then(res => res.text())
-        .then(csvText => {
-          parseCSV(csvText);
-        })
-        .catch(() => {
-          console.warn("gallery.csv 불러오기 실패. 기본 테스트 데이터 세팅.");
-        });
-    });
-
-    // CSV 파싱 엔진
-    function parseCSV(text) {
-      const lines = text.trim().split('\n');
-      if (lines.length < 2) return;
-
-      const headers = lines[0].split(',').map(h => h.trim());
-      galleryData = lines.slice(1).map(line => {
-        // 큰따옴표안 컴마 처리 정규식
-        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        const item = {};
-        headers.forEach((header, index) => {
-          let val = values[index] ? values[index].trim() : '';
-          if (val.startsWith('"') && val.endsWith('"')) {
-            val = val.substring(1, val.length - 1);
-          }
-          item[header] = val;
-        });
-        return item;
-      });
-
-      renderGallery(galleryData);
-    }
-
-    // 외부 CSV 로드 함수
-    function loadExternalCSV(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        parseCSV(e.target.result);
-      };
-      reader.readAsText(file);
-    }
-
-    // 갤러리 그리드 렌더링
-    function renderGallery(items) {
-      const grid = document.getElementById('galleryGrid');
-      grid.innerHTML = '';
-
-      items.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => openModal(item);
-
-        card.innerHTML = `
-          <img src="${item.image}" alt="${item.title}" loading="lazy">
-          <div class="card-overlay">
-            <div class="card-title">${item.title || 'Untitled'}</div>
-            <div class="card-prompt">${item.prompt || ''}</div>
-            <div class="card-meta">
-              <span>by ${item.author || 'Anonymous'}</span>
-              <button class="like-btn" onclick="event.stopPropagation(); addLike(${index}, this)">
-                ❤️ ${item.likes || 0}
-              </button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // 실시간 검색
-    function handleSearch() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = galleryData.filter(item => 
-        (item.title && item.title.toLowerCase().includes(query)) ||
-        (item.prompt && item.prompt.toLowerCase().includes(query)) ||
-        (item.tags && item.tags.toLowerCase().includes(query))
-      );
-      renderGallery(filtered);
-    }
-
-    // 카테고리 필터
-    function filterCategory(cat) {
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      event.target.classList.add('active');
-
-      if (cat === 'All') {
-        renderGallery(galleryData);
-      } else {
-        const filtered = galleryData.filter(item => item.category === cat);
-        renderGallery(filtered);
-      }
-    }
-
-    // 좋아요 기능
-    function addLike(index, btn) {
-      let likes = parseInt(galleryData[index].likes || 0);
-      likes++;
-      galleryData[index].likes = likes;
-      btn.innerHTML = `❤️ ${likes}`;
-    }
-
-    // 상세보기 모달
-    function openModal(item) {
-      document.getElementById('modalImg').src = item.image;
-      document.getElementById('modalTitle').innerText = item.title || 'Untitled';
-      document.getElementById('modalMeta').innerText = `Created by ${item.author || 'Me'} • ${item.date || ''}`;
-      document.getElementById('modalPrompt').innerText = item.prompt || 'No prompt provided.';
-      document.getElementById('modalTags').innerText = item.tags ? `Tags: ${item.tags}` : '';
-      document.getElementById('imageModal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('imageModal').classList.remove('active');
-    }
-
-    // 프롬프트 복사
-    function copyPrompt() {
-      const text = document.getElementById('modalPrompt').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Prompt copied to clipboard!');
-      });
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
